@@ -17,7 +17,7 @@ func UseCors(apiBuilder *router.APIBuilder, opts web.CORS) {
 }
 
 func allowedAllOptions() cors.Options {
-	return cors.Options{
+	options := cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{iris.MethodPost,
 			iris.MethodGet,
@@ -26,6 +26,9 @@ func allowedAllOptions() cors.Options {
 			iris.MethodOptions,
 			iris.MethodPut},
 		AllowedHeaders: []string{"Content-Type",
+			"X-Requested-With",
+			"Origin",
+			"Accept",
 			"AccessToken",
 			"X-CSRF-Token",
 			"Authorization",
@@ -40,4 +43,5 @@ func allowedAllOptions() cors.Options {
 			"New-Expires-At"},
 		AllowCredentials: true,
 	}
+	return options
 }
