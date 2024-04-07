@@ -9,9 +9,6 @@ import (
 
 func HandleError(statusCode int, ctx iris.Context, err error) {
 	ctx.StopWithError(statusCode, err)
-	// ctx.StopWithJSON(statusCode, model.NewErrorResponse(func(br *model.BaseResponse) {
-	// 	br.SetMessage(err.Error())
-	// }))
 }
 
 // handle StatusBadRequest
@@ -47,4 +44,12 @@ func HandleSuccessWithListData(ctx iris.Context, data interface{}, total int64) 
 
 func HandlerBinary(ctx iris.Context, data []byte) (int, error) {
 	return ctx.Binary(data)
+}
+
+func HandleSuccessWithTableData(ctx iris.Context, list interface{}, total int64, opts ...TableDataOption) {
+	d := newDefaultTableData(list, total)
+	for _, eachOpt := range opts {
+		eachOpt(d)
+	}
+	HandleSuccessWithData(ctx, d)
 }
