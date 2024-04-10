@@ -5,7 +5,6 @@ import (
 
 	"github.com/kataras/iris/v12/context"
 
-	"github.com/abmpio/abmp/pkg/log"
 	"github.com/abmpio/abmp/pkg/model"
 )
 
@@ -26,14 +25,13 @@ func (v *errWrapperMiddleware) ServeHTTP(ctx *context.Context) {
 	if context.StatusCodeNotSuccessful(statusCode) && !v.responseIsIgnore(responseData) {
 		ctx.Recorder().ResetBody()
 		err := ctx.GetErr()
+		// responseDataString := string(responseData)
 		ctx.StopWithJSON(statusCode, model.NewErrorResponse(func(br *model.BaseResponse) {
 			if err != nil {
 				br.SetMessage(err.Error())
-			} else {
-				br.SetMessage(string(responseData))
 			}
 		}))
-		log.Logger.Error(string(responseData))
+		// log.Logger.Error(responseDataString)
 	}
 }
 
