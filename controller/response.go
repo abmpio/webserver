@@ -28,6 +28,10 @@ func HandleErrorInternalServerError(ctx iris.Context, err error) {
 	HandleError(http.StatusInternalServerError, ctx, err)
 }
 
+func HandleResponseWith(ctx iris.Context, opts ...func(*model.BaseResponse)) {
+	ctx.StopWithJSON(http.StatusOK, model.NewSuccessResponse(opts...))
+}
+
 func HandleSuccess(ctx iris.Context) {
 	ctx.StopWithJSON(http.StatusOK, model.NewSuccessResponse())
 }
