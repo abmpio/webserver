@@ -20,18 +20,18 @@ func (v *errWrapperMiddleware) ServeHTTP(ctx *context.Context) {
 	ctx.Record()
 	ctx.Next()
 
-	responseData := ctx.Recorder().Body()
 	statusCode := ctx.GetStatusCode()
-	if context.StatusCodeNotSuccessful(statusCode) && !v.responseIsIgnore(responseData) {
-		ctx.Recorder().ResetBody()
-		err := ctx.GetErr()
-		// responseDataString := string(responseData)
-		ctx.StopWithJSON(statusCode, model.NewErrorResponse(func(br *model.BaseResponse) {
-			if err != nil {
-				br.SetMessage(err.Error())
-			}
-		}))
-		// log.Logger.Error(responseDataString)
+	if context.StatusCodeNotSuccessful(statusCode) {
+		responseData := ctx.Recorder().Body()
+		if !v.responseIsIgnore(responseData) {
+			ctx.Recorder().ResetBody()
+			err := ctx.GetErr()
+			ctx.StopWithJSON(statusCode, model.NewErrorResponse(func(br *model.BaseResponse) {
+				if err != nil {
+					br.SetMessage(err.Error())
+				}
+			}))
+		}
 	}
 }
 
