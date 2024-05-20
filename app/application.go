@@ -101,13 +101,11 @@ func (a *Application) Build(configurators ...Configurator) *Application {
 		panic(msg)
 	}
 
-	//配置web应用中间件
-	cli.SetCliApplication(cli.NewCliApplication())
-	cli.Application.ConfigureService()
+	cli.GetHost().Application().ConfigureService()
 
 	a.pprofStartupAction()
 	//运行启动项
-	app.HostApplication.RunStartup()
+	cli.GetHost().Application().RunStartup()
 
 	//构建配置
 	appConfigurators := make([]iris.Configurator, 0)
