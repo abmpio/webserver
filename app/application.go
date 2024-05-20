@@ -9,8 +9,8 @@ import (
 	"github.com/abmpio/abmp/pkg/log"
 	"github.com/abmpio/abmp/pkg/utils/validator"
 	"github.com/abmpio/app"
+	"github.com/abmpio/app/cli"
 	"github.com/abmpio/app/host"
-	"github.com/abmpio/app/web"
 	"github.com/abmpio/configurationx"
 	cors "github.com/abmpio/webserver/app/middleware/cors"
 	errHandler "github.com/abmpio/webserver/app/middleware/err"
@@ -102,8 +102,8 @@ func (a *Application) Build(configurators ...Configurator) *Application {
 	}
 
 	//配置web应用中间件
-	web.SetWebApplication(web.NewWebApplication())
-	web.Application.ConfigureService()
+	cli.SetCliApplication(cli.NewCliApplication())
+	cli.Application.ConfigureService()
 
 	a.pprofStartupAction()
 	//运行启动项
