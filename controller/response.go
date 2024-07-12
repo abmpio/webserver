@@ -1,13 +1,53 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/abmpio/abmp/pkg/log"
 	"github.com/abmpio/abmp/pkg/model"
+	"github.com/abmpio/webserver/options"
 	"github.com/kataras/iris/v12"
+	"go.uber.org/zap"
 )
 
+const (
+	log_prefix_webrequest = "(web request) --->"
+)
+
+func infoLog(ctx iris.Context, m string, a ...any) {
+	log.Logger.Info(fmt.Sprintf(log_prefix_webrequest+m, a...),
+		zap.String("userId", getUserId(ctx)))
+}
+
+func errorLog(ctx iris.Context, m string, a ...any) {
+	log.Logger.Warn(fmt.Sprintf(log_prefix_webrequest+m, a...),
+		zap.String("userId", getUserId(ctx)))
+}
+
+func getUserId(ctx iris.Context) string {
+	userId, ok := ctx.Value("userId").(string)
+	if !ok {
+		return ""
+	}
+	return userId
+}
+
+func getRequestEndpoint(ctx iris.Context) string {
+	request := ctx.Request()
+	if request == nil {
+		return ""
+	}
+	return request.RequestURI
+}
+
 func HandleError(statusCode int, ctx iris.Context, err error) {
+	if options.GetOptions().Log.EnableLogRequest {
+		errorLog(ctx, "request:%s,statusCode:%d,err:%s",
+			getRequestEndpoint(ctx),
+			statusCode,
+			err.Error())
+	}
 	ctx.StopWithError(statusCode, err)
 }
 
@@ -29,21 +69,46 @@ func HandleErrorInternalServerError(ctx iris.Context, err error) {
 }
 
 func HandleResponseWith(ctx iris.Context, opts ...func(*model.BaseResponse)) {
-	ctx.StopWithJSON(http.StatusOK, model.NewSuccessResponse(opts...))
+	statusCode := http.StatusOK
+	if options.GetOptions().Log.EnableLogRequest {
+		infoLog(ctx, "request:%s,statusCode:%d",
+			getRequestEndpoint(ctx),
+			statusCode)
+	}
+	ctx.StopWithJSON(statusCode, model.NewSuccessResponse(opts...))
 }
 
 func HandleSuccess(ctx iris.Context) {
-	ctx.StopWithJSON(http.StatusOK, model.NewSuccessResponse())
+	statusCode := http.StatusOK
+	if options.GetOptions().Log.EnableLogRequest {
+		infoLog(ctx, "request:%s,statusCode:%d",
+			getRequestEndpoint(ctx),
+			statusCode)
+	}
+
+	ctx.StopWithJSON(statusCode, model.NewSuccessResponse())
 }
 
 func HandleSuccessWithData(ctx iris.Context, data interface{}) {
-	ctx.StopWithJSON(http.StatusOK, model.NewSuccessResponse(func(br *model.BaseResponse) {
+	statusCode := http.StatusOK
+	if options.GetOptions().Log.EnableLogRequest {
+		infoLog(ctx, "request:%s,statusCode:%d",
+			getRequestEndpoint(ctx),
+			statusCode)
+	}
+	ctx.StopWithJSON(statusCode, model.NewSuccessResponse(func(br *model.BaseResponse) {
 		br.SetData(data)
 	}))
 }
 
 func HandleSuccessWithListData(ctx iris.Context, data interface{}, total int64) {
-	ctx.StopWithJSON(http.StatusOK, model.NewSuccessListResponse(data, total))
+	statusCode := http.StatusOK
+	if options.GetOptions().Log.EnableLogRequest {
+		infoLog(ctx, "request:%s,statusCode:%d",
+			getRequestEndpoint(ctx),
+			statusCode)
+	}
+	ctx.StopWithJSON(statusCode, model.NewSuccessListResponse(data, total))
 }
 
 func HandlerBinary(ctx iris.Context, data []byte) (int, error) {
