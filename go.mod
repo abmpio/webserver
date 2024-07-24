@@ -10,6 +10,7 @@ require (
 	github.com/abmpio/configurationx v0.0.0-20240520083200-bcc6a8bb57fa
 	github.com/iris-contrib/middleware/cors v0.0.0-20230817093337-c874b7c7eb8a
 	github.com/kataras/iris/v12 v12.2.4
+	go.uber.org/zap v1.27.0
 )
 
 require (
@@ -84,7 +85,6 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yosssi/ace v0.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect
 	golang.org/x/net v0.22.0 // indirect
