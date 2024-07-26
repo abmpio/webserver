@@ -30,7 +30,7 @@ func pprofStartupAction(webApp *webapp.Application) app.IStartupAction {
 		webApp.Any("/debug/pprof/profile", iris.FromStd(pprof.Profile))
 		webApp.Any("/debug/pprof/symbol", iris.FromStd(pprof.Symbol))
 		webApp.Any("/debug/pprof/trace", iris.FromStd(pprof.Trace))
-		webApp.Any("/debug/pprof /debug/pprof/{action:string}", requestPprof.New())
+		webApp.Any("/debug/pprof/debug/pprof/{action:string}", requestPprof.New())
 
 		httpValue := os.Getenv("app.http")
 		advertiseHostValue := os.Getenv("app.advertisehost")

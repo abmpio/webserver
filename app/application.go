@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -18,10 +16,6 @@ import (
 	"github.com/kataras/iris/v12/context"
 	requestLogger "github.com/kataras/iris/v12/middleware/logger"
 	"github.com/kataras/iris/v12/middleware/recover"
-
-	"net/http/pprof"
-
-	requestPprof "github.com/kataras/iris/v12/middleware/pprof"
 )
 
 func init() {
@@ -103,7 +97,7 @@ func (a *Application) Build(configurators ...Configurator) *Application {
 
 	cli.GetHost().Application().ConfigureService()
 
-	a.pprofStartupAction()
+	// a.pprofStartupAction()
 	//运行启动项
 	cli.GetHost().Application().RunStartup()
 
@@ -136,25 +130,25 @@ func (a *Application) Run(configurators ...Configurator) *Application {
 	return a
 }
 
-func (a *Application) pprofStartupAction() {
-	if app.HostApplication.SystemConfig().App.IsRunInCli {
-		return
-	}
+// func (a *Application) pprofStartupAction() {
+// 	if app.HostApplication.SystemConfig().App.IsRunInCli {
+// 		return
+// 	}
 
-	log.Logger.Debug("正在构建pprof路径组件,/debug/pprof...")
-	a.Any("/debug/pprof/cmdline", iris.FromStd(pprof.Cmdline))
-	a.Any("/debug/pprof/profile", iris.FromStd(pprof.Profile))
-	a.Any("/debug/pprof/symbol", iris.FromStd(pprof.Symbol))
-	a.Any("/debug/pprof/trace", iris.FromStd(pprof.Trace))
-	a.Any("/debug/pprof /debug/pprof/{action:string}", requestPprof.New())
+// 	log.Logger.Debug("正在构建pprof路径组件,/debug/pprof...")
+// 	a.Any("/debug/pprof/cmdline", iris.FromStd(pprof.Cmdline))
+// 	a.Any("/debug/pprof/profile", iris.FromStd(pprof.Profile))
+// 	a.Any("/debug/pprof/symbol", iris.FromStd(pprof.Symbol))
+// 	a.Any("/debug/pprof/trace", iris.FromStd(pprof.Trace))
+// 	a.Any("/debug/pprof/debug/pprof/{action:string}", requestPprof.New())
 
-	httpValue := os.Getenv("app.http")
-	advertiseHostValue := os.Getenv("app.advertisehost")
-	if len(httpValue) > 0 {
-		pprofPath := httpValue
-		if len(advertiseHostValue) > 0 {
-			pprofPath = strings.Replace(httpValue, "0.0.0.0", advertiseHostValue, 1)
-		}
-		log.Logger.Debug(fmt.Sprintf("已经构建好pprof路径组件,你可以通过 %s/debug/pprof 来访问pprof", pprofPath))
-	}
-}
+// 	httpValue := os.Getenv("app.http")
+// 	advertiseHostValue := os.Getenv("app.advertisehost")
+// 	if len(httpValue) > 0 {
+// 		pprofPath := httpValue
+// 		if len(advertiseHostValue) > 0 {
+// 			pprofPath = strings.Replace(httpValue, "0.0.0.0", advertiseHostValue, 1)
+// 		}
+// 		log.Logger.Debug(fmt.Sprintf("已经构建好pprof路径组件,你可以通过 %s/debug/pprof 来访问pprof", pprofPath))
+// 	}
+// }
