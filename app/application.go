@@ -12,10 +12,10 @@ import (
 	"github.com/abmpio/configurationx"
 	cors "github.com/abmpio/webserver/app/middleware/cors"
 	errHandler "github.com/abmpio/webserver/app/middleware/err"
+	recover "github.com/abmpio/webserver/app/middleware/recover"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	requestLogger "github.com/kataras/iris/v12/middleware/logger"
-	"github.com/kataras/iris/v12/middleware/recover"
 )
 
 func init() {
