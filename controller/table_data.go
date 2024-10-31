@@ -8,8 +8,8 @@ type TableData struct {
 }
 
 type Pagination struct {
-	PageSize    int `json:"pageSize"`
-	CurrentPage int `json:"currentPage"`
+	PageSize    int `json:"pageSize" url:"pageSize"`
+	CurrentPage int `json:"currentPage" url:"currentPage"`
 }
 
 func newDefaultTableData(list interface{}, total int64) *TableData {
