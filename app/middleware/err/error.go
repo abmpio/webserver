@@ -27,8 +27,16 @@ func (v *errWrapperMiddleware) ServeHTTP(ctx *context.Context) {
 			ctx.Recorder().ResetBody()
 			err := ctx.GetErr()
 			ctx.StopWithJSON(statusCode, model.NewErrorResponse(func(br *model.BaseResponse) {
+				br.Code = statusCode
+				br.Status = model.HttpResponseMessageError
+				var message string
 				if err != nil {
-					br.SetMessage(err.Error())
+					message = err.Error()
+				} else {
+					message = string(responseData)
+				}
+				if len(message) > 0 {
+					br.SetMessage(message)
 				}
 			}))
 		}
