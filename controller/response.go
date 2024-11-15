@@ -60,6 +60,10 @@ func HandleErrorUnauthorized(ctx iris.Context, err error) {
 	HandleError(http.StatusUnauthorized, ctx, err)
 }
 
+func HandleErrorForbidden(ctx iris.Context) {
+	HandleError(http.StatusForbidden, ctx, fmt.Errorf("没有权限访问"))
+}
+
 func HandleErrorNotFound(ctx iris.Context, err error) {
 	HandleError(http.StatusNotFound, ctx, err)
 }
