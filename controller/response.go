@@ -78,6 +78,17 @@ func HandleResponseWith(ctx iris.Context, opts ...func(*model.BaseResponse)) {
 	ctx.StopWithJSON(statusCode, model.NewSuccessResponse(opts...))
 }
 
+func HandleNotSuccess(ctx iris.Context, opts ...func(*model.BaseResponse)) {
+	statusCode := http.StatusOK
+	if options.GetOptions().Log.EnableLogRequest {
+		infoLog(ctx, "request:%s,statusCode:%d",
+			getRequestEndpoint(ctx),
+			statusCode)
+	}
+
+	ctx.StopWithJSON(statusCode, model.NewErrorResponse(opts...))
+}
+
 func HandleSuccess(ctx iris.Context) {
 	statusCode := http.StatusOK
 	if options.GetOptions().Log.EnableLogRequest {
