@@ -51,6 +51,11 @@ func HandleError(statusCode int, ctx iris.Context, err error) {
 	ctx.StopWithError(statusCode, err)
 }
 
+// stop with status code
+func HandleStopWithStatusCode(statusCode int, ctx iris.Context) {
+	ctx.StopWithStatus(statusCode)
+}
+
 // handle StatusBadRequest
 func HandleErrorBadRequest(ctx iris.Context, err error) {
 	HandleError(http.StatusBadRequest, ctx, err)
