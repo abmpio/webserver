@@ -4,14 +4,8 @@
 package main
 
 import (
-	"fmt"
-
 	_ "github.com/abmpio/webserver/starter/pprof"
 )
-
-func init() {
-	fmt.Printf("plugin healthcheck init function called\r\n")
-}
 
 type Bootstrap struct {
 }
