@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	log.Logger.Info("webserver.pprof starter init")
+	fmt.Println("webserver.pprof starter init")
 
 	app.RegisterStartupAction(pprofStartupAction)
 }
