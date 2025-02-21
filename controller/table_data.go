@@ -3,6 +3,7 @@ package controller
 type TableData struct {
 	List  interface{} `json:"list"`
 	Total int64       `json:"total"`
+	Info  interface{} `json:"info"`
 
 	Pagination
 }
@@ -24,6 +25,13 @@ func newDefaultTableData(list interface{}, total int64) *TableData {
 }
 
 type TableDataOption func(d *TableData) *TableData
+
+func TableDataWithInfo(dataInfo interface{}) TableDataOption {
+	return func(d *TableData) *TableData {
+		d.Info = dataInfo
+		return d
+	}
+}
 
 func TableDataWithPageSize(pageSize int) TableDataOption {
 	return func(d *TableData) *TableData {
