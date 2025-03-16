@@ -15,13 +15,23 @@ const (
 	log_prefix_webrequest = "(web request) --->"
 )
 
-func infoLog(ctx iris.Context, m string, a ...any) {
-	log.Logger.Info(fmt.Sprintf(log_prefix_webrequest+m, a...),
+func infoRequestLog(ctx iris.Context, m string, a ...any) {
+	info := fmt.Sprintf("%s %s --> url:%s --> requestId:%v ",
+		log_prefix_webrequest,
+		ctx.Method(),
+		getRequestEndpoint(ctx),
+		ctx.GetID())
+	log.Logger.Info(fmt.Sprintf(info+m, a...),
 		zap.String("userId", getUserId(ctx)))
 }
 
-func errorLog(ctx iris.Context, m string, a ...any) {
-	log.Logger.Warn(fmt.Sprintf(log_prefix_webrequest+m, a...),
+func errorRequestLog(ctx iris.Context, m string, a ...any) {
+	info := fmt.Sprintf("%s %s ---> url:%s --> requestId:%v ",
+		log_prefix_webrequest,
+		ctx.Method(),
+		getRequestEndpoint(ctx),
+		ctx.GetID())
+	log.Logger.Warn(fmt.Sprintf(info+m, a...),
 		zap.String("userId", getUserId(ctx)))
 }
 
@@ -43,8 +53,7 @@ func getRequestEndpoint(ctx iris.Context) string {
 
 func HandleError(statusCode int, ctx iris.Context, err error) {
 	if options.GetOptions().Log.EnableLogRequest {
-		errorLog(ctx, "request:%s,statusCode:%d,err:%s",
-			getRequestEndpoint(ctx),
+		errorRequestLog(ctx, "statusCode:%d,err:%s",
 			statusCode,
 			err.Error())
 	}
@@ -53,6 +62,10 @@ func HandleError(statusCode int, ctx iris.Context, err error) {
 
 // stop with status code
 func HandleStopWithStatusCode(statusCode int, ctx iris.Context) {
+	if options.GetOptions().Log.EnableLogRequest {
+		errorRequestLog(ctx, "statusCode:%d",
+			statusCode)
+	}
 	ctx.StopWithStatus(statusCode)
 }
 
@@ -80,8 +93,7 @@ func HandleErrorInternalServerError(ctx iris.Context, err error) {
 func HandleResponseWith(ctx iris.Context, opts ...func(*model.BaseResponse)) {
 	statusCode := http.StatusOK
 	if options.GetOptions().Log.EnableLogRequest {
-		infoLog(ctx, "request:%s,statusCode:%d",
-			getRequestEndpoint(ctx),
+		infoRequestLog(ctx, "statusCode:%d",
 			statusCode)
 	}
 	ctx.StopWithJSON(statusCode, model.NewSuccessResponse(opts...))
@@ -90,8 +102,7 @@ func HandleResponseWith(ctx iris.Context, opts ...func(*model.BaseResponse)) {
 func HandleNotSuccess(ctx iris.Context, opts ...func(*model.BaseResponse)) {
 	statusCode := http.StatusOK
 	if options.GetOptions().Log.EnableLogRequest {
-		infoLog(ctx, "request:%s,statusCode:%d",
-			getRequestEndpoint(ctx),
+		infoRequestLog(ctx, "statusCode:%d",
 			statusCode)
 	}
 
@@ -101,8 +112,7 @@ func HandleNotSuccess(ctx iris.Context, opts ...func(*model.BaseResponse)) {
 func HandleSuccess(ctx iris.Context) {
 	statusCode := http.StatusOK
 	if options.GetOptions().Log.EnableLogRequest {
-		infoLog(ctx, "request:%s,statusCode:%d",
-			getRequestEndpoint(ctx),
+		infoRequestLog(ctx, "statusCode:%d",
 			statusCode)
 	}
 
@@ -112,8 +122,7 @@ func HandleSuccess(ctx iris.Context) {
 func HandleSuccessWithData(ctx iris.Context, data interface{}) {
 	statusCode := http.StatusOK
 	if options.GetOptions().Log.EnableLogRequest {
-		infoLog(ctx, "request:%s,statusCode:%d",
-			getRequestEndpoint(ctx),
+		infoRequestLog(ctx, "statusCode:%d",
 			statusCode)
 	}
 	ctx.StopWithJSON(statusCode, model.NewSuccessResponse(func(br *model.BaseResponse) {
@@ -124,8 +133,7 @@ func HandleSuccessWithData(ctx iris.Context, data interface{}) {
 func HandleSuccessWithListData(ctx iris.Context, data interface{}, total int64) {
 	statusCode := http.StatusOK
 	if options.GetOptions().Log.EnableLogRequest {
-		infoLog(ctx, "request:%s,statusCode:%d",
-			getRequestEndpoint(ctx),
+		infoRequestLog(ctx, "statusCode:%d",
 			statusCode)
 	}
 	ctx.StopWithJSON(statusCode, model.NewSuccessListResponse(data, total))

@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -10,12 +12,14 @@ import (
 	"github.com/abmpio/app/cli"
 	"github.com/abmpio/app/host"
 	"github.com/abmpio/configurationx"
+	jsonUtil "github.com/abmpio/libx/json"
 	cors "github.com/abmpio/webserver/app/middleware/cors"
 	errHandler "github.com/abmpio/webserver/app/middleware/err"
 	recover "github.com/abmpio/webserver/app/middleware/recover"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	requestLogger "github.com/kataras/iris/v12/middleware/logger"
+	"github.com/kataras/iris/v12/middleware/requestid"
 )
 
 func init() {
@@ -24,10 +28,11 @@ func init() {
 
 func newIrisApplication() *iris.Application {
 	app := iris.New()
+	app.Use(requestid.New())
+	app.Use(requestLogger.New(requestLogConfig()))
 	//错误封装
 	app.Use(errHandler.New())
 	app.Use(recover.New())
-	app.Use(requestLogger.New(requestLogConfig()))
 	if configurationx.GetInstance().Web != nil {
 		cors.UseCors(app.APIBuilder, configurationx.GetInstance().Web.Cors)
 	}
@@ -40,11 +45,55 @@ func newIrisApplication() *iris.Application {
 
 func requestLogConfig() requestLogger.Config {
 	c := requestLogger.DefaultConfig()
+	// c.MessageContextKeys = []string{
+	// 	"iris.context.id",
+	// 	"userId",
+	// }
+	c.MessageHeaderKeys = []string{
+		"tenant",
+	}
 	c.AddSkipper(func(ctx *context.Context) bool {
 		p := ctx.Path()
 		return strings.HasPrefix(p, "/api/health/check")
 	})
+	logInfo := func(ctx *context.Context, latency time.Duration) string {
+		// all except latency to string
+		var status, ip, method, path string
+		requestId := ctx.GetID()
+		ip = ctx.RemoteAddr()
+		method = ctx.Method()
+		path = ctx.Request().URL.RequestURI()
+		status = strconv.Itoa(ctx.GetStatusCode())
+		userId := ctx.Values().Get("userId")
+		headerMessage := jsonUtil.ObjectToJson(getHeaderMessages([]string{
+			"tenant",
+		}, ctx))
+		line := fmt.Sprintf("%s %s,requestId:%v,userId:%v,status:%v,duration:%4v,ip:%s,header:%s",
+			method,
+			path,
+			requestId,
+			userId,
+			status,
+			latency,
+			ip,
+			headerMessage)
+		return line
+	}
+	c.LogFuncCtx = func(ctx *context.Context, latency time.Duration) {
+		// no new line, the framework's logger is responsible how to render each log.
+		line := logInfo(ctx, latency)
+		log.Logger.Info(line)
+	}
 	return c
+}
+
+func getHeaderMessages(keyList []string, ctx *context.Context) map[string]string {
+	m := make(map[string]string)
+	for _, key := range keyList {
+		msg := ctx.GetHeader(key)
+		m[key] = msg
+	}
+	return m
 }
 
 type Application struct {
