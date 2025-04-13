@@ -8,7 +8,7 @@ require (
 	github.com/abmpio/abmp v0.0.0-20240708094807-9bfd8036f0dc
 	github.com/abmpio/app v0.0.0-20250316102917-c6228484a2a5
 	github.com/abmpio/configurationx v0.0.0-20250316102208-bb34a5de7a88
-	github.com/abmpio/libx v0.0.0-20250122091832-703dd45ef186
+	github.com/abmpio/libx v0.0.0-20250413103030-5f79bc357bb6
 	github.com/iris-contrib/middleware/cors v0.0.0-20230817093337-c874b7c7eb8a
 	github.com/kataras/iris/v12 v12.2.11-0.20240707172138-6776bf0dc945
 	go.uber.org/zap v1.27.0
