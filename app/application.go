@@ -144,6 +144,8 @@ func (a *Application) Build(configurators ...Configurator) *Application {
 		panic(msg)
 	}
 
+	// set host.ENV_Healthcheck,host.ENV_AdvertiseHost env value
+	setHealthCheckEnv()
 	cli.GetHost().Application().ConfigureService()
 
 	// a.pprofStartupAction()
