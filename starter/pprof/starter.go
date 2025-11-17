@@ -16,7 +16,9 @@ import (
 )
 
 func init() {
-	fmt.Println("webserver.pprof starter init")
+	if app.IsServerMode() {
+		fmt.Println("webserver.pprof starter init")
+	}
 
 	app.RegisterStartupAction(pprofStartupAction)
 }

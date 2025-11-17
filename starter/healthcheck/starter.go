@@ -8,6 +8,8 @@ import (
 
 func init() {
 
-	fmt.Println("webserver.healthcheck starter init")
+	if app.IsServerMode() {
+		fmt.Println("webserver.healthcheck starter init")
+	}
 	app.RegisterStartupAction(healthcheckStartup)
 }
