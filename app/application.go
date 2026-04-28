@@ -54,7 +54,11 @@ func requestLogConfig() requestLogger.Config {
 	}
 	c.AddSkipper(func(ctx *context.Context) bool {
 		p := ctx.Path()
-		return strings.HasPrefix(p, "/api/health/check")
+		skipped := strings.HasPrefix(p, "/api/health/check")
+		if skipped {
+			return true
+		}
+		return _irisApplicationConfiguratorOptions.shouldSkipRequestLogPath(p)
 	})
 	logInfo := func(ctx *context.Context, latency time.Duration) string {
 		// all except latency to string
@@ -94,6 +98,33 @@ func getHeaderMessages(keyList []string, ctx *context.Context) map[string]string
 		m[key] = msg
 	}
 	return m
+}
+
+type irisApplicationConfiguratorOptions struct {
+	// 用来跳过logger的path比较函数列表
+	requestLogPathSkipped []func(path string) bool
+}
+
+var (
+	_irisApplicationConfiguratorOptions = &irisApplicationConfiguratorOptions{
+		requestLogPathSkipped: make([]func(path string) bool, 0),
+	}
+)
+
+// 检测path对应的request log是否应该skip
+func (o *irisApplicationConfiguratorOptions) shouldSkipRequestLogPath(path string) bool {
+	if len(o.requestLogPathSkipped) <= 0 {
+		return false
+	}
+	for _, eachFn := range o.requestLogPathSkipped {
+		if eachFn == nil {
+			continue
+		}
+		if eachFn(path) {
+			return true
+		}
+	}
+	return false
 }
 
 type Application struct {
@@ -181,25 +212,11 @@ func (a *Application) Run(configurators ...Configurator) *Application {
 	return a
 }
 
-// func (a *Application) pprofStartupAction() {
-// 	if app.HostApplication.SystemConfig().App.IsRunInCli {
-// 		return
-// 	}
-
-// 	log.Logger.Debug("正在构建pprof路径组件,/debug/pprof...")
-// 	a.Any("/debug/pprof/cmdline", iris.FromStd(pprof.Cmdline))
-// 	a.Any("/debug/pprof/profile", iris.FromStd(pprof.Profile))
-// 	a.Any("/debug/pprof/symbol", iris.FromStd(pprof.Symbol))
-// 	a.Any("/debug/pprof/trace", iris.FromStd(pprof.Trace))
-// 	a.Any("/debug/pprof/debug/pprof/{action:string}", requestPprof.New())
-
-// 	httpValue := os.Getenv("app.http")
-// 	advertiseHostValue := os.Getenv("app.advertisehost")
-// 	if len(httpValue) > 0 {
-// 		pprofPath := httpValue
-// 		if len(advertiseHostValue) > 0 {
-// 			pprofPath = strings.Replace(httpValue, "0.0.0.0", advertiseHostValue, 1)
-// 		}
-// 		log.Logger.Debug(fmt.Sprintf("已经构建好pprof路径组件,你可以通过 %s/debug/pprof 来访问pprof", pprofPath))
-// 	}
-// }
+// AddRequestLogSkipper 添加进程级请求日志跳过规则。
+// 调用方应在Application.Run前完成配置；请求处理阶段只读，运行期不要再修改该规则列表。
+func (a *Application) AddRequestLogSkipper(pathFn func(path string) bool) {
+	if pathFn == nil {
+		return
+	}
+	_irisApplicationConfiguratorOptions.requestLogPathSkipped = append(_irisApplicationConfiguratorOptions.requestLogPathSkipped, pathFn)
+}
